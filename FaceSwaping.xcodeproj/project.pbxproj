@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		16C520612188E0CA00241C57 /* LineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C520602188E0CA00241C57 /* LineView.swift */; };
 		16DD32A9217A1CCD002BE178 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DD32A8217A1CCD002BE178 /* AppDelegate.swift */; };
 		16DD32AB217A1CCD002BE178 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DD32AA217A1CCD002BE178 /* ViewController.swift */; };
 		16DD32AE217A1CCD002BE178 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16DD32AC217A1CCD002BE178 /* Main.storyboard */; };
@@ -26,6 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		16C520602188E0CA00241C57 /* LineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineView.swift; sourceTree = "<group>"; };
 		16DD32A5217A1CCD002BE178 /* FaceSwaping.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FaceSwaping.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		16DD32A8217A1CCD002BE178 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		16DD32AA217A1CCD002BE178 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 		16DD32A7217A1CCD002BE178 /* FaceSwaping */ = {
 			isa = PBXGroup;
 			children = (
+				16C520602188E0CA00241C57 /* LineView.swift */,
 				16DD32A8217A1CCD002BE178 /* AppDelegate.swift */,
 				16DD32AA217A1CCD002BE178 /* ViewController.swift */,
 				16DD32B4217A1CCE002BE178 /* Info.plist */,
@@ -207,6 +210,7 @@
 			files = (
 				16DD32AB217A1CCD002BE178 /* ViewController.swift in Sources */,
 				16DD32A9217A1CCD002BE178 /* AppDelegate.swift in Sources */,
+				16C520612188E0CA00241C57 /* LineView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

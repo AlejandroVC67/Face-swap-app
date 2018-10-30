@@ -114,19 +114,23 @@ class ViewController: UIViewController {
                 croppedUIImageView.frame = self.greenView.frame
                 self.view.addSubview(croppedUIImageView)
                 
+                //Get the landmarks of the woman face
                 guard let landmarks = faceObservationWoman.landmarks else { return }
                 
                 let womanImageSize = CGSize(width: resizedImageWidth, height: scaledHeightWoman)
                 guard var womanFaceContourLandmarks = landmarks.faceContour?.pointsInImage(imageSize: womanImageSize) else { return }
-            
+                
                 guard let womanLeftEyebrowLandmarks = landmarks.leftEyebrow?.pointsInImage(imageSize: womanImageSize) else { return }
                 
                 guard let womanRightEyebrowLandmarks = landmarks.rightEyebrow?.pointsInImage(imageSize: womanImageSize) else { return }
                 
-                womanFaceContourLandmarks.append(contentsOf: womanRightEyebrowLandmarks)
-                womanFaceContourLandmarks.append(contentsOf: womanLeftEyebrowLandmarks)
+                //Append the landmarks of the eyebrows with to the contour
+                womanFaceContourLandmarks.append(contentsOf: womanRightEyebrowLandmarks.reversed())
+                womanFaceContourLandmarks.append(contentsOf: womanLeftEyebrowLandmarks.reversed())
                 
-                self.cropWomanImage(usingLandmarksOf: womanFaceContourLandmarks, scaledHeight: scaledHeightWoman)
+                //This function will crop the woman face, atm is just painting the points
+                self.cropWomanImage(womanFaceContourLandmarks, scaledHeight: scaledHeightWoman, imageView: womanImageView, frame: croppedFrame)
+                
                 
             })
         }
@@ -143,14 +147,18 @@ class ViewController: UIViewController {
         
     }
     
-    func cropWomanImage(usingLandmarksOf: [CGPoint], scaledHeight: CGFloat){
-        print(usingLandmarksOf)
+    func cropWomanImage(_ withFacePoint: [CGPoint], scaledHeight: CGFloat, imageView: UIImageView, frame: CGRect){
         var myFaceContourRect = CGRect()
         var myViewContourView = UIView()
-        usingLandmarksOf.forEach { (point) in
+        var faceContourPoints: [CGPoint] = [withFacePoint[0]]
+        
+        print(withFacePoint)
+        
+        withFacePoint.forEach { (point) in
 //            print(point)
             let newPoint = CGPoint(x: point.x /* * resizedImageWidth */,
                 y: (1 - point.y) + scaledHeight /* (scaledHeightWoman * (1 - point.y))*/ )
+            faceContourPoints.append(newPoint)
 //            print("newPoint: \(newPoint)")
             myFaceContourRect = CGRect(origin: newPoint,
                             size: CGSize(width: 5, height: 5))
@@ -158,6 +166,10 @@ class ViewController: UIViewController {
             myViewContourView.backgroundColor = .red
             self.view.addSubview(myViewContourView)
         }
+        
+        let lineView = LineView(frame: imageView.frame, points: faceContourPoints)
+        lineView.draw(frame)
+        self.view.addSubview(lineView)
     }
     
     func womanImageViewNormalSize(image: UIImage) -> UIImageView {
