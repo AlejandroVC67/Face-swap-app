@@ -11,89 +11,102 @@ import Vision
 
 class ViewController: UIViewController {
     var rect = CGRect()
-    var croppedImage = UIImage(named: "img2")?.cgImage
+    var croppedImage = UIImage(named: "man")?.cgImage
     var greenView = UIView()
     var redView = UIView()
     override func viewDidLoad() {
         super.viewDidLoad()
         //Variables necesarias
-        let imageWidth = view.frame.width / 2
+        let resizedImageWidth = view.frame.width / 2
         
         //cara mujer
-        guard let image = UIImage(named: "img1") else { return }
-        let imageView = UIImageView(image: image)
-        let scaledHeight = imageWidth /  image.size.width * image.size.height
-        imageView.contentMode = .scaleAspectFit
-        imageView.frame = CGRect(x: 0, y: 0, width: imageWidth , height: scaledHeight)
-        view.addSubview(imageView)
+        guard let womanImage = UIImage(named: "woman") else { return }
+        let womanImageView = UIImageView(image: womanImage)
+        let scaledHeightWoman = resizedImageWidth /  womanImage.size.width * womanImage.size.height
+        womanImageView.contentMode = .scaleAspectFit
+        womanImageView.frame = CGRect(x: 0, y: 0, width: resizedImageWidth , height: scaledHeightWoman)
+        view.addSubview(womanImageView)
 
         //cara hombre
-        guard let image2 = UIImage(named: "img2") else { return }
-        let imageView2 = UIImageView(image: image2)
-        let scaledHeight2 = imageWidth / image2.size.width * image2.size.height
-        imageView2.contentMode = .scaleAspectFit
-        imageView2.frame = CGRect(x: 0 + imageWidth, y: 0, width: view.frame.width / 2, height: scaledHeight2)
-        view.addSubview(imageView2)
+        guard let manImage = UIImage(named: "man") else { return }
+        let manImageView = UIImageView(image: manImage)
+        let scaledHeightMan = resizedImageWidth / manImage.size.width * manImage.size.height
+        manImageView.contentMode = .scaleAspectFit
+        manImageView.frame = CGRect(x: 0 + resizedImageWidth, y: 0, width: view.frame.width / 2, height: scaledHeightMan)
+        view.addSubview(manImageView)
         
         //req cara hombre
-        let request2 = VNDetectFaceLandmarksRequest { (req2, err) in
-            if let err2 = err {
-                print("Error", err2)
+        let requestMan = VNDetectFaceLandmarksRequest { (responsesMan, err) in
+            if let err = err {
+                print("Error", err)
                 return
             }
 
-            req2.results?.forEach({ (res2) in
-                guard let faceObservation2 = res2 as? VNFaceObservation else { return }
+            responsesMan.results?.forEach({ (responseMan) in
+                guard let faceObservationMan = responseMan as? VNFaceObservation else { return }
                 
-                let x2  = imageWidth + (imageWidth * faceObservation2.boundingBox.origin.x)
-                let width2 = imageWidth * faceObservation2.boundingBox.width
-                let height2 =  scaledHeight2 * faceObservation2.boundingBox.height
-                let y2 = scaledHeight2 * (1 - faceObservation2.boundingBox.origin.y) - height2
+                let x2  = resizedImageWidth + (resizedImageWidth * faceObservationMan.boundingBox.origin.x)
+                let width2 = resizedImageWidth * faceObservationMan.boundingBox.width
+                let height2 =  scaledHeightMan * faceObservationMan.boundingBox.height
+                let y2 = scaledHeightMan * (1 - faceObservationMan.boundingBox.origin.y) - height2
 
                 
                 self.greenView.backgroundColor = .green
                 self.greenView.alpha = 0.4
                 self.greenView.frame = CGRect(x: x2, y: y2, width: width2, height: height2)
-                //self.view.addSubview(self.greenView)
+                self.view.addSubview(self.greenView)
             })
         }
-        guard let cgImage2 = image2.cgImage else { return }
-        let handler2 = VNImageRequestHandler(cgImage: cgImage2, options: [:])
+        guard let cgManImage = manImage.cgImage else { return }
+        let manHandler = VNImageRequestHandler(cgImage: cgManImage, options: [:])
 
         do {
-            try handler2.perform([request2])
+            try manHandler.perform([requestMan])
             
         } catch let reqErr {
             print("failed", reqErr)
         }
         
         //MARK: req cara mujer
-        let request = VNDetectFaceLandmarksRequest { (req, err) in
+        let requestWoman = VNDetectFaceLandmarksRequest { (responsesWoman, err) in
             if let err = err {
                 print("Error", err)
                 return
             }
             
-            req.results?.forEach({ (res) in
-                guard let faceObservation = res as? VNFaceObservation else { return }
-                let x  = imageWidth * faceObservation.boundingBox.origin.x
-                let width = imageWidth * faceObservation.boundingBox.width
-                let height =  scaledHeight * faceObservation.boundingBox.height
-                let y  = scaledHeight * (1 - faceObservation.boundingBox.origin.y) - height
+            responsesWoman.results?.forEach({ (res) in
+                // Detect Woman face observation
+                guard let faceObservationWoman = res as? VNFaceObservation else { return }
+                let x  = resizedImageWidth * faceObservationWoman.boundingBox.origin.x
+                let width = resizedImageWidth * faceObservationWoman.boundingBox.width
+                let height =  scaledHeightWoman * faceObservationWoman.boundingBox.height
+                let y  = scaledHeightWoman * (1 - faceObservationWoman.boundingBox.origin.y) - height
                 let frameOfTheFace = CGRect(x: x, y: y, width: width, height: height)
                 self.redView.backgroundColor = .red
                 self.redView.alpha = 0.4
                 self.redView.frame = frameOfTheFace
                 //self.view.addSubview(self.redView)
                 
-                self.rect = CGRect(x: x, y: y + scaledHeight, width: width / imageWidth, height: height / scaledHeight)
-                guard let cgimage = image.cgImage else { return }
-                let face = UIImage(cgImage: cgimage)
-                let croppedFrame = CGRect(x: self.rect.minX / imageWidth * face.size.width,
+                // Woman Face observation without resizing
+                let womanFaceObsRect = CGRect(x: x,
+                                              y: y + scaledHeightWoman,
+                                              width: faceObservationWoman.boundingBox.width,
+                                              height: faceObservationWoman.boundingBox.height)
+                guard let cgWomanImage = womanImage.cgImage else { print("woman cgImage can't be created"); return }
+                let womanFaceImage = UIImage(cgImage: cgWomanImage)
+                let croppedFrame = CGRect(x: womanFaceObsRect.minX / resizedImageWidth * womanFaceImage.size.width,
                                           y: height,
-                                          width: self.rect.width * face.size.width,
-                                          height: self.rect.height * face.size.height)
-                self.croppedImage = cgimage.cropping(to: croppedFrame)
+                                          width: womanFaceObsRect.width * womanFaceImage.size.width,
+                                          height: womanFaceObsRect.height * womanFaceImage.size.height)
+                
+                //Create Normal Size Woman Image with the blue face square
+                let womanImageViewNormalSize = self.womanImageViewNormalSize(image: womanFaceImage)
+                let womanBlueViewNormalSize = self.womanBlueViewNormalSize(faceFrame: croppedFrame)
+                
+                //self.view.addSubview(womanImageViewNormalSize)
+                //self.view.addSubview(womanBlueViewNormalSize)
+                
+                self.croppedImage = cgWomanImage.cropping(to: croppedFrame)
                 let croppedUIImage = UIImage(cgImage: self.croppedImage!)
                 let croppedUIImageView = UIImageView(image: croppedUIImage)
                 croppedUIImageView.layer.cornerRadius = width / 2
@@ -102,42 +115,53 @@ class ViewController: UIViewController {
                 self.view.addSubview(croppedUIImageView)
                 
                 
-                guard let landmarks = faceObservation.landmarks else { return }
-                let faceContour = landmarks.faceContour?.normalizedPoints
+                guard let landmarks = faceObservationWoman.landmarks else { return }
+                let faceContour = landmarks.faceContour?.pointsInImage(imageSize: CGSize(width: resizedImageWidth,
+                                                                                        height: scaledHeightWoman))
                 var myRect = CGRect()
                 var myView = UIView()
                 faceContour?.forEach({ (point) in
                     print(point)
-                    let newPoint = CGPoint(x: point.x * imageWidth, y: (scaledHeight * (1 - point.y)))
-                    myRect = CGRect(origin: newPoint, size: CGSize(width: 5, height: 5))
+                    let newPoint = CGPoint(x: point.x /* * resizedImageWidth */,
+                                           y: (1 - point.y) + scaledHeightWoman /* (scaledHeightWoman * (1 - point.y))*/ )
+                    print("newPoint: \(newPoint)")
+                    myRect = CGRect(origin: newPoint,
+                                    size: CGSize(width: 5, height: 5))
                     myView = UIView(frame: myRect)
                     myView.backgroundColor = .red
 
                     self.view.addSubview(myView)
                 })
-                
-                //pintando vista morada
-//                let imgviewx = UIImageView(image: face)
-//                imgviewx.frame = CGRect(x: 0, y: 0, width: face.size.width, height: face.size.height) //Y debería probarse con 0 y no  con scaledHeight
-//                let blueView = UIView(frame: croppedFrame)
-//                blueView.alpha = 0.4
-//                blueView.backgroundColor = .blue
-//                self.view.addSubview(imgviewx)
-//                self.view.addSubview(blueView)
-                
             })
         }
         
-        guard let cgImage = image.cgImage else { return }
+        guard let cgImage = womanImage.cgImage else { return }
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
         
         do {
-            try handler.perform([request])
+            try handler.perform([requestWoman])
         } catch let reqErr {
             print("failed", reqErr)
         }
         
         
+    }
+    
+    func womanImageViewNormalSize(image: UIImage) -> UIImageView {
+//        pintando vista morada
+        let imgviewx = UIImageView(image: image)
+        imgviewx.frame = CGRect(x: 0,
+                                y: 0,
+                                width: image.size.width,
+                                height: image.size.height) //Y debería probarse con 0 y no  con scaledHeight
+        return imgviewx
+    }
+    
+    func womanBlueViewNormalSize(faceFrame:CGRect) -> UIView {
+        let blueView = UIView(frame: faceFrame)
+        blueView.alpha = 0.4
+        blueView.backgroundColor = .blue
+        return blueView
     }
     
     fileprivate func addPoints(in landmarkRegion: VNFaceLandmarkRegion2D, to path: CGMutablePath, applying affineTransform: CGAffineTransform, closingWhenComplete closePath: Bool) {
