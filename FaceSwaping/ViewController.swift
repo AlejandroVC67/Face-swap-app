@@ -114,24 +114,20 @@ class ViewController: UIViewController {
                 croppedUIImageView.frame = self.greenView.frame
                 self.view.addSubview(croppedUIImageView)
                 
-                
                 guard let landmarks = faceObservationWoman.landmarks else { return }
-                let faceContour = landmarks.faceContour?.pointsInImage(imageSize: CGSize(width: resizedImageWidth,
-                                                                                        height: scaledHeightWoman))
-                var myRect = CGRect()
-                var myView = UIView()
-                faceContour?.forEach({ (point) in
-                    print(point)
-                    let newPoint = CGPoint(x: point.x /* * resizedImageWidth */,
-                                           y: (1 - point.y) + scaledHeightWoman /* (scaledHeightWoman * (1 - point.y))*/ )
-                    print("newPoint: \(newPoint)")
-                    myRect = CGRect(origin: newPoint,
-                                    size: CGSize(width: 5, height: 5))
-                    myView = UIView(frame: myRect)
-                    myView.backgroundColor = .red
-
-                    self.view.addSubview(myView)
-                })
+                
+                let womanImageSize = CGSize(width: resizedImageWidth, height: scaledHeightWoman)
+                guard var womanFaceContourLandmarks = landmarks.faceContour?.pointsInImage(imageSize: womanImageSize) else { return }
+            
+                guard let womanLeftEyebrowLandmarks = landmarks.leftEyebrow?.pointsInImage(imageSize: womanImageSize) else { return }
+                
+                guard let womanRightEyebrowLandmarks = landmarks.rightEyebrow?.pointsInImage(imageSize: womanImageSize) else { return }
+                
+                womanFaceContourLandmarks.append(contentsOf: womanRightEyebrowLandmarks)
+                womanFaceContourLandmarks.append(contentsOf: womanLeftEyebrowLandmarks)
+                
+                self.cropWomanImage(usingLandmarksOf: womanFaceContourLandmarks, scaledHeight: scaledHeightWoman)
+                
             })
         }
         
@@ -145,6 +141,23 @@ class ViewController: UIViewController {
         }
         
         
+    }
+    
+    func cropWomanImage(usingLandmarksOf: [CGPoint], scaledHeight: CGFloat){
+        print(usingLandmarksOf)
+        var myFaceContourRect = CGRect()
+        var myViewContourView = UIView()
+        usingLandmarksOf.forEach { (point) in
+//            print(point)
+            let newPoint = CGPoint(x: point.x /* * resizedImageWidth */,
+                y: (1 - point.y) + scaledHeight /* (scaledHeightWoman * (1 - point.y))*/ )
+//            print("newPoint: \(newPoint)")
+            myFaceContourRect = CGRect(origin: newPoint,
+                            size: CGSize(width: 5, height: 5))
+            myViewContourView = UIView(frame: myFaceContourRect)
+            myViewContourView.backgroundColor = .red
+            self.view.addSubview(myViewContourView)
+        }
     }
     
     func womanImageViewNormalSize(image: UIImage) -> UIImageView {
@@ -162,18 +175,5 @@ class ViewController: UIViewController {
         blueView.alpha = 0.4
         blueView.backgroundColor = .blue
         return blueView
-    }
-    
-    fileprivate func addPoints(in landmarkRegion: VNFaceLandmarkRegion2D, to path: CGMutablePath, applying affineTransform: CGAffineTransform, closingWhenComplete closePath: Bool) {
-        let pointCount = landmarkRegion.pointCount
-        if pointCount > 1 {
-            let points: [CGPoint] = landmarkRegion.normalizedPoints
-            path.move(to: points[0], transform: affineTransform)
-            path.addLines(between: points, transform: affineTransform)
-            if closePath {
-                path.addLine(to: points[0], transform: affineTransform)
-                path.closeSubpath()
-            }
-        }
     }
 }
